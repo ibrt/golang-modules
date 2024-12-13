@@ -4,7 +4,7 @@ go 1.23
 
 require (
 	github.com/benbjohnson/clock v1.3.5
-	github.com/ibrt/golang-utils v0.3.0
+	github.com/ibrt/golang-utils v0.5.0
 	github.com/onsi/gomega v1.36.1
 	go.uber.org/mock v0.5.0
 )
