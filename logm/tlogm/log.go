@@ -28,7 +28,7 @@ type MockHelper struct {
 	client             *libhoney.Client
 }
 
-// BeforeSuite implements fixturez.BeforeSuite.
+// BeforeSuite implements [fixturez.BeforeSuite].
 func (h *MockHelper) BeforeSuite(ctx context.Context, g *gomega.WithT) context.Context {
 	mock := NewMockSender()
 	var logger *logrus.Logger
@@ -50,10 +50,10 @@ func (h *MockHelper) BeforeSuite(ctx context.Context, g *gomega.WithT) context.C
 	h.mock = mock
 	h.client = client
 
-	return logm.NewSingletonInjector(logm.NewLogFromClient(client))(ctx)
+	return logm.NewSingletonInjector(logm.NewRawLogFromClient(client))(ctx)
 }
 
-// AfterSuite implements fixturez.AfterSuite.
+// AfterSuite implements [fixturez.AfterSuite].
 func (h *MockHelper) AfterSuite(_ context.Context, _ *gomega.WithT) {
 	h.client.Flush()
 	h.client.Close()
@@ -65,8 +65,13 @@ func (h *MockHelper) AfterSuite(_ context.Context, _ *gomega.WithT) {
 	h.client = nil
 }
 
-// BeforeTest implements fixturez.BeforeTest.
+// BeforeTest implements [fixturez.BeforeTest].
 func (h *MockHelper) BeforeTest(ctx context.Context, _ *gomega.WithT, _ *gomock.Controller) context.Context {
 	h.mock.ClearEvents()
 	return ctx
+}
+
+// GetMock returns the mock.
+func (h *MockHelper) GetMock() *MockSender {
+	return h.mock
 }

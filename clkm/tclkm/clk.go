@@ -26,14 +26,14 @@ type RealHelper struct {
 	releaser injectz.Releaser
 }
 
-// BeforeSuite implements fixturez.BeforeSuite.
+// BeforeSuite implements [fixturez.BeforeSuite].
 func (h *RealHelper) BeforeSuite(ctx context.Context, _ *gomega.WithT) context.Context {
 	injector, releaser := clkm.Initializer(ctx)
 	h.releaser = releaser
 	return injector(ctx)
 }
 
-// AfterSuite implements fixturez.AfterSuite.
+// AfterSuite implements [fixturez.AfterSuite].
 func (h *RealHelper) AfterSuite(_ context.Context, _ *gomega.WithT) {
 	h.releaser()
 	h.releaser = nil
@@ -41,23 +41,28 @@ func (h *RealHelper) AfterSuite(_ context.Context, _ *gomega.WithT) {
 
 // MockHelper is a test helper.
 type MockHelper struct {
-	Mock *clock.Mock
+	mock *clock.Mock
 }
 
-// BeforeSuite implements fixturez.BeforeSuite.
+// BeforeSuite implements [fixturez.BeforeSuite].
 func (h *MockHelper) BeforeSuite(ctx context.Context, _ *gomega.WithT) context.Context {
-	h.Mock = clock.NewMock()
-	h.Mock.Set(time.Now())
-	return clkm.NewSingletonInjector(h.Mock)(ctx)
+	h.mock = clock.NewMock()
+	h.mock.Set(time.Now())
+	return clkm.NewSingletonInjector(h.mock)(ctx)
 }
 
-// AfterSuite implements fixturez.AfterSuite.
+// AfterSuite implements [fixturez.AfterSuite].
 func (h *MockHelper) AfterSuite(_ context.Context, _ *gomega.WithT) {
-	h.Mock = nil
+	h.mock = nil
 }
 
-// BeforeTest implements fixturez.BeforeTest.
+// BeforeTest implements [fixturez.BeforeTest].
 func (h *MockHelper) BeforeTest(ctx context.Context, _ *gomega.WithT, _ *gomock.Controller) context.Context {
-	h.Mock.Set(time.Now().UTC())
+	h.mock.Set(time.Now().UTC())
 	return ctx
+}
+
+// GetMock returns the mock.
+func (h *MockHelper) GetMock() *clock.Mock {
+	return h.mock
 }

@@ -26,7 +26,7 @@ func (s *RealSuite) TestRealHelper(ctx context.Context, g *WithT) {
 }
 
 type MockSuite struct {
-	Clock *tclkm.MockHelper
+	CLK *tclkm.MockHelper
 }
 
 func TestMockSuite(t *testing.T) {
@@ -35,6 +35,6 @@ func TestMockSuite(t *testing.T) {
 
 func (s *MockSuite) TestMockHelper(ctx context.Context, g *WithT) {
 	now := time.Now().Add(-time.Minute)
-	s.Clock.Mock.Set(now)
+	s.CLK.GetMock().Set(now)
 	g.Expect(clkm.MustGet(ctx).Now()).To(Equal(now))
 }

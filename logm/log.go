@@ -71,12 +71,12 @@ func NewInitializer(clientFields map[string]any) injectz.Initializer {
 			client.AddField(k, v)
 		}
 
-		return NewSingletonInjector(NewLogFromClient(client)), func() { client.Close() }
+		return NewSingletonInjector(NewRawLogFromClient(client)), func() { client.Close() }
 	}
 }
 
-// NewLogFromClient initializes a new RawLog.
-func NewLogFromClient(client *libhoney.Client) RawLog {
+// NewRawLogFromClient initializes a new [RawLog] using the given [*libhoney.Client].
+func NewRawLogFromClient(client *libhoney.Client) RawLog {
 	return &backgroundLogImpl{
 		client: client,
 	}
@@ -87,8 +87,8 @@ func NewSingletonInjector(log RawLog) injectz.Injector {
 	return injectz.NewSingletonInjector(logContextKey, log)
 }
 
-// Get extracts, panics if not found.
-func Get(ctx context.Context) Log {
+// MustGet extracts, panics if not found.
+func MustGet(ctx context.Context) Log {
 	return &adapterLogImpl{
 		ctx: ctx,
 		log: ctx.Value(logContextKey).(RawLog),
