@@ -1,3 +1,4 @@
+// Package logm implements a logging module.
 package logm
 
 import (
