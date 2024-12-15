@@ -350,3 +350,16 @@ func (*FieldsSuite) TestNewAttachableEvent(ctx context.Context, g *WithT) {
 			"name":                 "name",
 		}))
 }
+
+func (*FieldsSuite) TestNewTraceLinkEvent(ctx context.Context, g *WithT) {
+	ne := newTestNewEvent()
+
+	g.Expect(newTraceLinkEvent(
+		ctx, ne, "attached-span-id",
+		&TraceLink{
+			TraceID: "trace-id",
+			SpanID:  "span-id",
+		}).
+		Fields()).
+		To(Equal(map[string]any{}))
+}
