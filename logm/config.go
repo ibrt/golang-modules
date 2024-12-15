@@ -11,6 +11,8 @@ import (
 
 var (
 	_ encoding.TextUnmarshaler = (*LogConfigLogrusOutput)(nil)
+	_ cfgm.Config              = (*LogConfig)(nil)
+	_ LogConfigMixin           = (*LogConfig)(nil)
 )
 
 // LogConfigLogrusOutput describes the acceptable values for [LogConfig.LogrusOutput].
@@ -34,6 +36,12 @@ func (l *LogConfigLogrusOutput) UnmarshalText(text []byte) error {
 	}
 }
 
+// LogConfigMixin describes the log module configuration.
+type LogConfigMixin interface {
+	cfgm.Config
+	GetLogConfig() *LogConfig
+}
+
 // LogConfig describes the log module configuration.
 type LogConfig struct {
 	HoneycombAPIKey     string                `env:"LOG_HONEYCOMB_API_KEY,required"`
@@ -43,8 +51,12 @@ type LogConfig struct {
 	LogrusLevel         logrus.Level          `env:"LOG_LOGRUS_LEVEL,required"`
 }
 
-// LogConfigMixin describes the log module configuration.
-type LogConfigMixin interface {
-	cfgm.Config
-	GetLogConfig() *LogConfig
+// Config implements the [cfgm.Config] interface.
+func (c *LogConfig) Config() {
+	// intentionally empty
+}
+
+// GetLogConfig implements the [LogConfigMixin] interface.
+func (c *LogConfig) GetLogConfig() *LogConfig {
+	return c
 }
