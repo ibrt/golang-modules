@@ -25,7 +25,7 @@ const (
 type errorMetadataKey int
 
 const (
-	errorMetadataKeyIsEmitted errorMetadataKey = iota
+	isEmittedErrorMetadataKey errorMetadataKey = iota
 )
 
 var (
@@ -38,7 +38,7 @@ type TraceLink struct {
 	SpanID  string
 }
 
-// Serialize the link annotation to string.
+// Serialize the [*TraceLink].
 func (l *TraceLink) Serialize() string {
 	if l == nil {
 		return ""
@@ -49,7 +49,7 @@ func (l *TraceLink) Serialize() string {
 	return ""
 }
 
-// MaybeParseTraceLink parses a serialized TraceLink.
+// MaybeParseTraceLink parses a serialized [*TraceLink].
 func MaybeParseTraceLink(traceLink string) *TraceLink {
 	matches := traceLinkRegexp.FindStringSubmatch(traceLink)
 
@@ -238,10 +238,10 @@ func getErrorName(err error) string {
 }
 
 func maybeSetIsEmitted(err error) {
-	errorz.MaybeSetMetadata(err, errorMetadataKeyIsEmitted, true)
+	errorz.MaybeSetMetadata(err, isEmittedErrorMetadataKey, true)
 }
 
 func getIsEmitted(err error) bool {
-	isEmitted, ok := errorz.MaybeGetMetadata[bool](err, errorMetadataKeyIsEmitted)
+	isEmitted, ok := errorz.MaybeGetMetadata[bool](err, isEmittedErrorMetadataKey)
 	return ok && isEmitted
 }

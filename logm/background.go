@@ -19,7 +19,7 @@ type backgroundLogImpl struct {
 	client *libhoney.Client
 }
 
-// EmitDebug implements the RawLog interface.
+// EmitDebug implements the [RawLog] interface.
 func (bL *backgroundLogImpl) EmitDebug(ctx context.Context, format string, options ...EmitOption) {
 	o := newEmitOptions(options...)
 	e := newAttachableEvent(ctx, bL.client, "", "debug")
@@ -27,7 +27,7 @@ func (bL *backgroundLogImpl) EmitDebug(ctx context.Context, format string, optio
 	errorz.MaybeMustWrap(e.Send())
 }
 
-// EmitInfo implements the RawLog interface.
+// EmitInfo implements the [RawLog] interface.
 func (bL *backgroundLogImpl) EmitInfo(ctx context.Context, format string, options ...EmitOption) {
 	o := newEmitOptions(options...)
 	e := newAttachableEvent(ctx, bL.client, "", "info")
@@ -35,7 +35,7 @@ func (bL *backgroundLogImpl) EmitInfo(ctx context.Context, format string, option
 	errorz.MaybeMustWrap(e.Send())
 }
 
-// EmitWarning implements the RawLog interface.
+// EmitWarning implements the [RawLog] interface.
 func (bL *backgroundLogImpl) EmitWarning(ctx context.Context, err error) {
 	maybeSetIsEmitted(err)
 	e := newAttachableEvent(ctx, bL.client, "", getWarningName(err))
@@ -43,7 +43,7 @@ func (bL *backgroundLogImpl) EmitWarning(ctx context.Context, err error) {
 	errorz.MaybeMustWrap(e.Send())
 }
 
-// EmitError implements the RawLog interface.
+// EmitError implements the [RawLog] interface.
 func (bL *backgroundLogImpl) EmitError(ctx context.Context, err error) {
 	maybeSetIsEmitted(err)
 	e := newAttachableEvent(ctx, bL.client, "", getErrorName(err))
@@ -51,12 +51,12 @@ func (bL *backgroundLogImpl) EmitError(ctx context.Context, err error) {
 	errorz.MaybeMustWrap(e.Send())
 }
 
-// EmitTraceLink implements the RawLog interface.
+// EmitTraceLink implements the [RawLog] interface.
 func (bL *backgroundLogImpl) EmitTraceLink(ctx context.Context, _ *TraceLink) {
 	bL.EmitWarning(ctx, errorz.Errorf("called EmitTraceLink in background Log"))
 }
 
-// Begin implements the RawLog interface.
+// Begin implements the [RawLog] interface.
 func (bL *backgroundLogImpl) Begin(ctx context.Context, name string, options ...BeginOption) (context.Context, func()) {
 	o := newBeginOptions(options...)
 
@@ -86,37 +86,37 @@ func (bL *backgroundLogImpl) Begin(ctx context.Context, name string, options ...
 	}
 }
 
-// SetUser implements the RawLog interface.
+// SetUser implements the [RawLog] interface.
 func (bL *backgroundLogImpl) SetUser(ctx context.Context, _ *User) {
 	bL.EmitWarning(ctx, errorz.Errorf("called SetUser in background Log"))
 }
 
-// SetPropagatingField implements the RawLog interface.
+// SetPropagatingField implements the [RawLog] interface.
 func (bL *backgroundLogImpl) SetPropagatingField(ctx context.Context, _ string, _ any) {
 	bL.EmitWarning(ctx, errorz.Errorf("called SetPropagatingField in background Log"))
 }
 
-// SetMetadataKey implements the RawLog interface.
+// SetMetadataKey implements the [RawLog] interface.
 func (bL *backgroundLogImpl) SetMetadataKey(ctx context.Context, _ string, _ any) {
 	bL.EmitWarning(ctx, errorz.Errorf("called SetMetadataKey in background Log"))
 }
 
-// SetErrorMetadataKey implements the RawLog interface.
+// SetErrorMetadataKey implements the [RawLog] interface.
 func (bL *backgroundLogImpl) SetErrorMetadataKey(ctx context.Context, _ string, _ any) {
 	bL.EmitWarning(ctx, errorz.Errorf("called SetErrorMetadataKey in background Log"))
 }
 
-// SetErrorFlag implements the RawLog interface.
+// SetErrorFlag implements the [RawLog] interface.
 func (bL *backgroundLogImpl) SetErrorFlag(ctx context.Context) {
 	bL.EmitWarning(ctx, errorz.Errorf("called SetErrorFlag in background Log"))
 }
 
-// GetCurrentTraceLink implements the RawLog interface.
+// GetCurrentTraceLink implements the [RawLog] interface.
 func (bL *backgroundLogImpl) GetCurrentTraceLink(_ context.Context) *TraceLink {
 	return nil
 }
 
-// Flush implements the RawLog interface.
+// Flush implements the [RawLog] interface.
 func (bL *backgroundLogImpl) Flush(_ context.Context) {
 	bL.client.Flush()
 }

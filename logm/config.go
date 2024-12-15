@@ -36,13 +36,13 @@ func (l *LogConfigLogrusOutput) UnmarshalText(text []byte) error {
 	}
 }
 
-// LogConfigMixin describes the log module configuration.
+// LogConfigMixin describes the module configuration.
 type LogConfigMixin interface {
 	cfgm.Config
 	GetLogConfig() *LogConfig
 }
 
-// LogConfig describes the log module configuration.
+// LogConfig describes the module configuration.
 type LogConfig struct {
 	HoneycombAPIKey     string                `env:"LOG_HONEYCOMB_API_KEY,required"`
 	HoneycombDataset    string                `env:"LOG_HONEYCOMB_DATASET,required"`
