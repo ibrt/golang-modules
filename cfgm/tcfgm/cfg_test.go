@@ -11,31 +11,34 @@ import (
 	"github.com/ibrt/golang-modules/cfgm/tcfgm"
 )
 
-type testConfig struct {
+var (
+	_ cfgm.Config = (*TestConfig)(nil)
+)
+
+type TestConfig struct {
 	Key string
 }
 
-// Config implements the [cfgm.Config] interface.
-func (cfg *testConfig) Config() {
+func (*TestConfig) Config() {
 	// intentionally empty
 }
 
 type Suite struct {
-	CFG *tcfgm.Helper[*testConfig]
+	CFG *tcfgm.Helper[*TestConfig]
 }
 
 func TestSuite(t *testing.T) {
 	fixturez.RunSuite(t, &Suite{
-		CFG: &tcfgm.Helper[*testConfig]{
-			ConfigLoader: func(ctx context.Context) (*testConfig, error) {
-				return &testConfig{Key: "Value"}, nil
+		CFG: &tcfgm.Helper[*TestConfig]{
+			ConfigLoader: func(ctx context.Context) (*TestConfig, error) {
+				return &TestConfig{Key: "Value"}, nil
 			},
 		},
 	})
 }
 
 func (s *Suite) TestMustGet(ctx context.Context, g *WithT) {
-	g.Expect(cfgm.MustGet[*testConfig](ctx)).To(Equal(&testConfig{
+	g.Expect(cfgm.MustGet[*TestConfig](ctx)).To(Equal(&TestConfig{
 		Key: "Value",
 	}))
 }
