@@ -100,7 +100,7 @@ func (s *WrapSuite) TestWrap0_Error(ctx context.Context, g *WithT) {
 			PointTo(MatchFields(IgnoreExtras, Fields{
 				"Timestamp": Equal(t1.Add(time.Second)),
 				"Data": And(
-					HaveKeyWithValue("error", "error"),
+					HaveKeyWithValue("error", "generic"),
 					HaveKeyWithValue("error.message", "test error"),
 					HaveKeyWithValue("meta.annotation_type", "span_event"),
 					HaveKeyWithValue("name", "error"),
@@ -153,7 +153,7 @@ func (s *WrapSuite) TestWrap0_Error_Emitted(ctx context.Context, g *WithT) {
 			PointTo(MatchFields(IgnoreExtras, Fields{
 				"Timestamp": Equal(t1.Add(2 * time.Second)),
 				"Data": And(
-					HaveKeyWithValue("error", "error"),
+					HaveKeyWithValue("error", "generic"),
 					HaveKeyWithValue("error.message", "test error"),
 					HaveKeyWithValue("meta.annotation_type", "span_event"),
 					HaveKeyWithValue("name", "error"),
@@ -197,15 +197,15 @@ func (s *WrapSuite) TestWrap0_Panic(ctx context.Context, g *WithT) {
 			s.Clock.GetMock().Add(time.Second)
 			panic(errorz.Errorf("test error"))
 		})).
-		To(MatchError("panic: test error"))
+		To(MatchError("test error"))
 
 	g.Expect(s.Log.GetMock().GetEvents()).
 		To(HaveExactElements(
 			PointTo(MatchFields(IgnoreExtras, Fields{
 				"Timestamp": Equal(t1.Add(time.Second)),
 				"Data": And(
-					HaveKeyWithValue("error", "error"),
-					HaveKeyWithValue("error.message", "panic: test error"),
+					HaveKeyWithValue("error", "generic"),
+					HaveKeyWithValue("error.message", "test error"),
 					HaveKeyWithValue("meta.annotation_type", "span_event"),
 					HaveKeyWithValue("name", "error"),
 					HaveKey("trace.trace_id"),
@@ -302,7 +302,7 @@ func (s *WrapSuite) TestWrap0Panic_Error(ctx context.Context, g *WithT) {
 			PointTo(MatchFields(IgnoreExtras, Fields{
 				"Timestamp": Equal(t1.Add(time.Second)),
 				"Data": And(
-					HaveKeyWithValue("error", "error"),
+					HaveKeyWithValue("error", "generic"),
 					HaveKeyWithValue("error.message", "test error"),
 					HaveKeyWithValue("meta.annotation_type", "span_event"),
 					HaveKeyWithValue("name", "error"),
@@ -392,7 +392,7 @@ func (s *WrapSuite) TestWrap1_Error(ctx context.Context, g *WithT) {
 			PointTo(MatchFields(IgnoreExtras, Fields{
 				"Timestamp": Equal(t1.Add(time.Second)),
 				"Data": And(
-					HaveKeyWithValue("error", "error"),
+					HaveKeyWithValue("error", "generic"),
 					HaveKeyWithValue("error.message", "test error"),
 					HaveKeyWithValue("meta.annotation_type", "span_event"),
 					HaveKeyWithValue("name", "error"),
@@ -424,7 +424,7 @@ func (s *WrapSuite) TestWrap1_Panic(ctx context.Context, g *WithT) {
 			s.Clock.GetMock().Add(time.Second)
 			panic(errorz.Errorf("test error"))
 		})
-	g.Expect(err).To(MatchError("panic: test error"))
+	g.Expect(err).To(MatchError("test error"))
 	g.Expect(out).To(Equal(""))
 
 	g.Expect(s.Log.GetMock().GetEvents()).
@@ -432,8 +432,8 @@ func (s *WrapSuite) TestWrap1_Panic(ctx context.Context, g *WithT) {
 			PointTo(MatchFields(IgnoreExtras, Fields{
 				"Timestamp": Equal(t1.Add(time.Second)),
 				"Data": And(
-					HaveKeyWithValue("error", "error"),
-					HaveKeyWithValue("error.message", "panic: test error"),
+					HaveKeyWithValue("error", "generic"),
+					HaveKeyWithValue("error.message", "test error"),
 					HaveKeyWithValue("meta.annotation_type", "span_event"),
 					HaveKeyWithValue("name", "error"),
 					HaveKey("trace.trace_id"),
@@ -525,7 +525,7 @@ func (s *WrapSuite) TestWrap1Panic_Error(ctx context.Context, g *WithT) {
 			PointTo(MatchFields(IgnoreExtras, Fields{
 				"Timestamp": Equal(t1.Add(time.Second)),
 				"Data": And(
-					HaveKeyWithValue("error", "error"),
+					HaveKeyWithValue("error", "generic"),
 					HaveKeyWithValue("error.message", "test error"),
 					HaveKeyWithValue("meta.annotation_type", "span_event"),
 					HaveKeyWithValue("name", "error"),
@@ -616,7 +616,7 @@ func (s *WrapSuite) TestWrap2_Error(ctx context.Context, g *WithT) {
 			PointTo(MatchFields(IgnoreExtras, Fields{
 				"Timestamp": Equal(t1.Add(time.Second)),
 				"Data": And(
-					HaveKeyWithValue("error", "error"),
+					HaveKeyWithValue("error", "generic"),
 					HaveKeyWithValue("error.message", "test error"),
 					HaveKeyWithValue("meta.annotation_type", "span_event"),
 					HaveKeyWithValue("name", "error"),
@@ -649,7 +649,7 @@ func (s *WrapSuite) TestWrap2_Panic(ctx context.Context, g *WithT) {
 			s.Clock.GetMock().Add(time.Second)
 			panic(errorz.Errorf("test error"))
 		})
-	g.Expect(err).To(MatchError("panic: test error"))
+	g.Expect(err).To(MatchError("test error"))
 	g.Expect(out1).To(Equal(""))
 	g.Expect(out2).To(Equal(""))
 
@@ -658,8 +658,8 @@ func (s *WrapSuite) TestWrap2_Panic(ctx context.Context, g *WithT) {
 			PointTo(MatchFields(IgnoreExtras, Fields{
 				"Timestamp": Equal(t1.Add(time.Second)),
 				"Data": And(
-					HaveKeyWithValue("error", "error"),
-					HaveKeyWithValue("error.message", "panic: test error"),
+					HaveKeyWithValue("error", "generic"),
+					HaveKeyWithValue("error.message", "test error"),
 					HaveKeyWithValue("meta.annotation_type", "span_event"),
 					HaveKeyWithValue("name", "error"),
 					HaveKey("trace.trace_id"),
@@ -752,7 +752,7 @@ func (s *WrapSuite) TestWrap2Panic_Error(ctx context.Context, g *WithT) {
 			PointTo(MatchFields(IgnoreExtras, Fields{
 				"Timestamp": Equal(t1.Add(time.Second)),
 				"Data": And(
-					HaveKeyWithValue("error", "error"),
+					HaveKeyWithValue("error", "generic"),
 					HaveKeyWithValue("error.message", "test error"),
 					HaveKeyWithValue("meta.annotation_type", "span_event"),
 					HaveKeyWithValue("name", "error"),
@@ -847,7 +847,7 @@ func (s *WrapSuite) TestWrap3_Error(ctx context.Context, g *WithT) {
 			PointTo(MatchFields(IgnoreExtras, Fields{
 				"Timestamp": Equal(t1.Add(time.Second)),
 				"Data": And(
-					HaveKeyWithValue("error", "error"),
+					HaveKeyWithValue("error", "generic"),
 					HaveKeyWithValue("error.message", "test error"),
 					HaveKeyWithValue("meta.annotation_type", "span_event"),
 					HaveKeyWithValue("name", "error"),
@@ -879,7 +879,7 @@ func (s *WrapSuite) TestWrap3_Panic(ctx context.Context, g *WithT) {
 			s.Clock.GetMock().Add(time.Second)
 			panic(errorz.Errorf("test error"))
 		})
-	g.Expect(err).To(MatchError("panic: test error"))
+	g.Expect(err).To(MatchError("test error"))
 	g.Expect(out1).To(Equal(""))
 	g.Expect(out2).To(Equal(""))
 	g.Expect(out3).To(Equal(""))
@@ -889,8 +889,8 @@ func (s *WrapSuite) TestWrap3_Panic(ctx context.Context, g *WithT) {
 			PointTo(MatchFields(IgnoreExtras, Fields{
 				"Timestamp": Equal(t1.Add(time.Second)),
 				"Data": And(
-					HaveKeyWithValue("error", "error"),
-					HaveKeyWithValue("error.message", "panic: test error"),
+					HaveKeyWithValue("error", "generic"),
+					HaveKeyWithValue("error.message", "test error"),
 					HaveKeyWithValue("meta.annotation_type", "span_event"),
 					HaveKeyWithValue("name", "error"),
 					HaveKey("trace.trace_id"),
@@ -985,7 +985,7 @@ func (s *WrapSuite) TestWrap3Panic_Error(ctx context.Context, g *WithT) {
 			PointTo(MatchFields(IgnoreExtras, Fields{
 				"Timestamp": Equal(t1.Add(time.Second)),
 				"Data": And(
-					HaveKeyWithValue("error", "error"),
+					HaveKeyWithValue("error", "generic"),
 					HaveKeyWithValue("error.message", "test error"),
 					HaveKeyWithValue("meta.annotation_type", "span_event"),
 					HaveKeyWithValue("name", "error"),
