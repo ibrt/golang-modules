@@ -25,7 +25,7 @@ type TestConfigMixin interface {
 }
 
 type TestConfigMixinImpl struct {
-	MixinKey string `env:"MIXIN_KEY_EC2B754B,required"`
+	MixinKey string `env:"MIXIN_KEY_EC2B754B,notEmpty"`
 }
 
 func (*TestConfigMixinImpl) Config() {
@@ -37,7 +37,7 @@ func (v *TestConfigMixinImpl) GetMixin() *TestConfigMixinImpl {
 }
 
 type TestConfig struct {
-	Key string `env:"KEY_EC2B754B,required"`
+	Key string `env:"KEY_EC2B754B,notEmpty"`
 	TestConfigMixinImpl
 }
 
