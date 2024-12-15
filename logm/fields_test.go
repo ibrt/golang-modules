@@ -161,8 +161,8 @@ func (*FieldsSuite) TestAddLocationFields(g *WithT) {
 	addLocationFields(af, err)
 
 	g.Expect(af.fields).To(And(
-		HaveKeyWithValue("location", Equal(frames[0].Summary)),
-		HaveKeyWithValue("location.short", Equal(frames[0].ShortLocation)),
+		HaveKeyWithValue("location", frames[0].Summary),
+		HaveKeyWithValue("location.short", frames[0].ShortLocation),
 		HaveKeyWithValue("location.frames", Not(BeEmpty())),
 	))
 }
@@ -270,9 +270,9 @@ func (*FieldsSuite) TestAddDebugFields(g *WithT) {
 
 	g.Expect(af.fields).To(And(
 		HaveKeyWithValue("location", Not(BeEmpty())),
-		HaveKeyWithValue("debug", Equal(true)),
-		HaveKeyWithValue("debug.message", Equal("fmt: 1")),
-		HaveKeyWithValue("debug.metadata.k", Equal("v")),
+		HaveKeyWithValue("debug", true),
+		HaveKeyWithValue("debug.message", "fmt: 1"),
+		HaveKeyWithValue("debug.metadata.k", "v"),
 	))
 }
 
@@ -282,9 +282,9 @@ func (*FieldsSuite) TestAddInfoFields(g *WithT) {
 
 	g.Expect(af.fields).To(And(
 		HaveKeyWithValue("location", Not(BeEmpty())),
-		HaveKeyWithValue("info", Equal(true)),
-		HaveKeyWithValue("info.message", Equal("fmt: 1")),
-		HaveKeyWithValue("info.metadata.k", Equal("v")),
+		HaveKeyWithValue("info", true),
+		HaveKeyWithValue("info.message", "fmt: 1"),
+		HaveKeyWithValue("info.metadata.k", "v"),
 	))
 }
 
@@ -295,8 +295,8 @@ func (*FieldsSuite) TestAddWarningFields(g *WithT) {
 
 		g.Expect(af.fields).To(And(
 			HaveKeyWithValue("location", Not(BeEmpty())),
-			HaveKeyWithValue("warning", Equal("generic")),
-			HaveKeyWithValue("warning.message", Equal("test error")),
+			HaveKeyWithValue("warning", "generic"),
+			HaveKeyWithValue("warning.message", "test error"),
 			HaveKeyWithValue("warning.dump", HavePrefix("(errorz.dump)")),
 			Not(HaveKey("warning.status")),
 		))
@@ -307,10 +307,10 @@ func (*FieldsSuite) TestAddWarningFields(g *WithT) {
 
 		g.Expect(af.fields).To(And(
 			HaveKeyWithValue("location", Not(BeEmpty())),
-			HaveKeyWithValue("warning", Equal("name")),
-			HaveKeyWithValue("warning.message", Equal("test error")),
+			HaveKeyWithValue("warning", "name"),
+			HaveKeyWithValue("warning.message", "test error"),
 			HaveKeyWithValue("warning.dump", HavePrefix("(errorz.dump)")),
-			HaveKeyWithValue("warning.status", Equal(http.StatusBadRequest)),
+			HaveKeyWithValue("warning.status", http.StatusBadRequest),
 		))
 	}
 }
@@ -322,8 +322,8 @@ func (*FieldsSuite) TestAddErrorFields(g *WithT) {
 
 		g.Expect(af.fields).To(And(
 			HaveKeyWithValue("location", Not(BeEmpty())),
-			HaveKeyWithValue("error", Equal("generic")),
-			HaveKeyWithValue("error.message", Equal("test error")),
+			HaveKeyWithValue("error", "generic"),
+			HaveKeyWithValue("error.message", "test error"),
 			HaveKeyWithValue("error.dump", HavePrefix("(errorz.dump)")),
 			Not(HaveKey("error.status")),
 		))
@@ -334,10 +334,10 @@ func (*FieldsSuite) TestAddErrorFields(g *WithT) {
 
 		g.Expect(af.fields).To(And(
 			HaveKeyWithValue("location", Not(BeEmpty())),
-			HaveKeyWithValue("error", Equal("name")),
-			HaveKeyWithValue("error.message", Equal("test error")),
+			HaveKeyWithValue("error", "name"),
+			HaveKeyWithValue("error.message", "test error"),
 			HaveKeyWithValue("error.dump", HavePrefix("(errorz.dump)")),
-			HaveKeyWithValue("error.status", Equal(http.StatusBadRequest)),
+			HaveKeyWithValue("error.status", http.StatusBadRequest),
 		))
 	}
 }
@@ -385,9 +385,9 @@ func (*FieldsSuite) TestNewTraceableEvent(ctx context.Context, g *WithT) {
 	g.Expect(e.Fields()).To(And(
 		HaveKeyWithValue("location", Not(BeEmpty())),
 		HaveKeyWithValue("duration_ms", BeNumerically("==", 1000)),
-		HaveKeyWithValue("name", Equal("name")),
-		HaveKeyWithValue("trace.span_id", Equal("span-id")),
-		HaveKeyWithValue("trace.parent_id", Equal("parent-span-id")),
+		HaveKeyWithValue("name", "name"),
+		HaveKeyWithValue("trace.span_id", "span-id"),
+		HaveKeyWithValue("trace.parent_id", "parent-span-id"),
 	))
 }
 
