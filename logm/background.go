@@ -74,11 +74,6 @@ func (bL *backgroundLogImpl) Begin(ctx context.Context, name string, options ...
 	}
 
 	sL.b.AddField("trace.trace_id", sL.traceID)
-
-	//if lc, ok := lambdacontext.FromContext(ctx); ok && lc.AwsRequestID != "" {
-	//	sL.SetPropagatingField(ctx, StandardKeyAWSRequestID, lc.AwsRequestID)
-	//}
-
 	ctx = NewSingletonInjector(sL)(ctx)
 
 	return ctx, func() {

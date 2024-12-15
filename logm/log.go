@@ -17,10 +17,6 @@ const (
 	logContextKey contextKey = iota
 )
 
-var (
-	_ injectz.Initializer = Initializer
-)
-
 // Log describes the module (with cached context).
 type Log interface {
 	EmitDebug(format string, options ...EmitOption)
@@ -55,26 +51,28 @@ type RawLog interface {
 	Flush(ctx context.Context)
 }
 
-// Initializer initializes.
-func Initializer(ctx context.Context) (injectz.Injector, injectz.Releaser) {
-	clkm.MustGet(ctx)
-	logCfg := cfgm.MustGet[LogConfigMixin](ctx).GetLogConfig()
+// NewInitializer returns a new [injectz.Initializer] that configures the given client-level fields.
+func NewInitializer(clientFields map[string]any) injectz.Initializer {
+	return func(ctx context.Context) (injectz.Injector, injectz.Releaser) {
+		clkm.MustGet(ctx)
+		logCfg := cfgm.MustGet[LogConfigMixin](ctx).GetLogConfig()
 
-	client, err := libhoney.NewClient(libhoney.ClientConfig{
-		APIKey:     logCfg.HoneycombAPIKey,
-		Dataset:    logCfg.HoneycombDataset,
-		SampleRate: logCfg.HoneycombSampleRate,
-		Transmission: NewSink(
-			MustNewDefaultLogrusLogger(ctx),
-			MustNewDefaultHoneycombSender(ctx)),
-	})
-	errorz.MaybeMustWrap(err)
+		client, err := libhoney.NewClient(libhoney.ClientConfig{
+			APIKey:     logCfg.HoneycombAPIKey,
+			Dataset:    logCfg.HoneycombDataset,
+			SampleRate: logCfg.HoneycombSampleRate,
+			Transmission: NewSink(
+				MustNewDefaultLogrusLogger(ctx),
+				MustNewDefaultHoneycombSender(ctx)),
+		})
+		errorz.MaybeMustWrap(err)
 
-	// client.AddField("service.runId", cfgz.GetRunID())
-	// client.AddField("service.version", cfgz.GetVersion())
-	// client.AddField("service.name", cfgz.GetLambdaFunctionName())
+		for k, v := range clientFields {
+			client.AddField(k, v)
+		}
 
-	return NewSingletonInjector(NewLogFromClient(client)), func() { client.Close() }
+		return NewSingletonInjector(NewLogFromClient(client)), func() { client.Close() }
+	}
 }
 
 // NewLogFromClient initializes a new RawLog.
