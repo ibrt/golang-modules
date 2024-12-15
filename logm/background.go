@@ -38,7 +38,7 @@ func (bL *backgroundLogImpl) EmitInfo(ctx context.Context, format string, option
 // EmitWarning implements the [RawLog] interface.
 func (bL *backgroundLogImpl) EmitWarning(ctx context.Context, err error) {
 	maybeSetIsEmitted(err)
-	e := newAttachableEvent(ctx, bL.client, "", getWarningName(err))
+	e := newAttachableEvent(ctx, bL.client, "", "warning")
 	addWarningFields(e, err)
 	errorz.MaybeMustWrap(e.Send())
 }
@@ -46,7 +46,7 @@ func (bL *backgroundLogImpl) EmitWarning(ctx context.Context, err error) {
 // EmitError implements the [RawLog] interface.
 func (bL *backgroundLogImpl) EmitError(ctx context.Context, err error) {
 	maybeSetIsEmitted(err)
-	e := newAttachableEvent(ctx, bL.client, "", getErrorName(err))
+	e := newAttachableEvent(ctx, bL.client, "", "error")
 	addErrorFields(e, err)
 	errorz.MaybeMustWrap(e.Send())
 }

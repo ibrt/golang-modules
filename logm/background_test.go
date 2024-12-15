@@ -2,9 +2,12 @@ package logm_test
 
 import (
 	"context"
+	"fmt"
+	"net/http"
 	"testing"
 
 	"github.com/ibrt/golang-utils/fixturez"
+	"github.com/ibrt/golang-utils/idz"
 	. "github.com/onsi/gomega"
 	. "github.com/onsi/gomega/gstruct"
 
@@ -13,6 +16,32 @@ import (
 	"github.com/ibrt/golang-modules/logm"
 	"github.com/ibrt/golang-modules/logm/tlogm"
 )
+
+type testCompleteError struct {
+	message string
+	name    string
+	status  int
+}
+
+func newTestCompleteError(message, name string, status int) *testCompleteError {
+	return &testCompleteError{
+		message: message,
+		name:    name,
+		status:  status,
+	}
+}
+
+func (e *testCompleteError) Error() string {
+	return e.message
+}
+
+func (e *testCompleteError) GetErrorName() string {
+	return e.name
+}
+
+func (e *testCompleteError) GetErrorHTTPStatus() int {
+	return e.status
+}
 
 type BackgroundSuite struct {
 	CLK *tclkm.MockHelper
@@ -59,25 +88,21 @@ func (s *BackgroundSuite) TestBackgroundEmitInfo(ctx context.Context, g *WithT) 
 			}))))
 }
 
-/*
 func (s *BackgroundSuite) TestBackgroundEmitWarning(ctx context.Context, g *WithT) {
 	logm.MustGet(ctx).EmitWarning(
-		errorz.Errorf("emit: background: warning",
-			errorz.ID("emit-background-warning"),
-			errorz.Status(http.StatusBadRequest),
-			errorz.M("ebwk", "ebwv")))
+		newTestCompleteError(
+			"emit: background: warning", "emit-background-warning", http.StatusBadRequest))
 
 	g.Expect(s.LOG.GetMock().GetEvents()).
 		To(HaveExactElements(
 			PointTo(MatchFields(IgnoreExtras, Fields{
 				"Timestamp": Equal(clkm.MustGet(ctx).Now()),
 				"Data": And(
-					HaveKeyWithValue("warning", "warning-emit-background-warning"),
+					HaveKeyWithValue("warning", "emit-background-warning"),
 					HaveKeyWithValue("warning.message", "emit: background: warning"),
-					HaveKeyWithValue("warning.id", errorz.ID("emit-background-warning")),
-					HaveKeyWithValue("warning.status", errorz.Status(http.StatusBadRequest)),
-					HaveKeyWithValue("warning.metadata.ebwk", "ebwv"),
-					HaveKeyWithValue("name", "warning-emit-background-warning"),
+					HaveKeyWithValue("warning.dump", HavePrefix("(errorz.dump)")),
+					HaveKeyWithValue("warning.status", http.StatusBadRequest),
+					HaveKeyWithValue("name", "warning"),
 				),
 			}))))
 
@@ -89,10 +114,10 @@ func (s *BackgroundSuite) TestBackgroundEmitWarning(ctx context.Context, g *With
 			PointTo(MatchFields(IgnoreExtras, Fields{
 				"Timestamp": Equal(clkm.MustGet(ctx).Now()),
 				"Data": And(
-					HaveKeyWithValue("warning", "warning"),
+					HaveKeyWithValue("warning", "generic"),
 					HaveKeyWithValue("warning.message", "emit: background: warning"),
+					HaveKeyWithValue("warning.dump", HavePrefix("(errorz.dump)")),
 					Not(HaveKey("warning.status")),
-					Not(HaveKey("warning.metadata")),
 					HaveKeyWithValue("name", "warning"),
 				),
 			}))))
@@ -100,22 +125,19 @@ func (s *BackgroundSuite) TestBackgroundEmitWarning(ctx context.Context, g *With
 
 func (s *BackgroundSuite) TestBackgroundEmitError(ctx context.Context, g *WithT) {
 	logm.MustGet(ctx).EmitError(
-		errorz.Errorf("emit: background: error",
-			errorz.ID("emit-background-error"),
-			errorz.Status(http.StatusBadRequest),
-			errorz.M("ebek", "ebev")))
+		newTestCompleteError(
+			"emit: background: error", "emit-background-error", http.StatusBadRequest))
 
 	g.Expect(s.LOG.GetMock().GetEvents()).
 		To(HaveExactElements(
 			PointTo(MatchFields(IgnoreExtras, Fields{
 				"Timestamp": Equal(clkm.MustGet(ctx).Now()),
 				"Data": And(
-					HaveKeyWithValue("error", "error-emit-background-error"),
+					HaveKeyWithValue("error", "emit-background-error"),
 					HaveKeyWithValue("error.message", "emit: background: error"),
-					HaveKeyWithValue("error.id", errorz.ID("emit-background-error")),
-					HaveKeyWithValue("error.status", errorz.Status(http.StatusBadRequest)),
-					HaveKeyWithValue("error.metadata.ebek", "ebev"),
-					HaveKeyWithValue("name", "error-emit-background-error"),
+					HaveKeyWithValue("error.dump", HavePrefix("(errorz.dump)")),
+					HaveKeyWithValue("error.status", http.StatusBadRequest),
+					HaveKeyWithValue("name", "error"),
 				),
 			}))))
 
@@ -127,10 +149,10 @@ func (s *BackgroundSuite) TestBackgroundEmitError(ctx context.Context, g *WithT)
 			PointTo(MatchFields(IgnoreExtras, Fields{
 				"Timestamp": Equal(clkm.MustGet(ctx).Now()),
 				"Data": And(
-					HaveKeyWithValue("error", "error"),
+					HaveKeyWithValue("error", "generic"),
 					HaveKeyWithValue("error.message", "emit: background: error"),
+					HaveKeyWithValue("error.dump", HavePrefix("(errorz.dump)")),
 					Not(HaveKey("error.status")),
-					Not(HaveKey("error.metadata")),
 					HaveKeyWithValue("name", "error"),
 				),
 			}))))
@@ -147,7 +169,7 @@ func (s *BackgroundSuite) TestBackgroundEmitTraceLink(ctx context.Context, g *Wi
 			PointTo(MatchFields(IgnoreExtras, Fields{
 				"Timestamp": Equal(clkm.MustGet(ctx).Now()),
 				"Data": And(
-					HaveKeyWithValue("warning", "warning"),
+					HaveKeyWithValue("warning", "generic"),
 					HaveKeyWithValue("warning.message", "called EmitTraceLink in background Log"),
 				),
 			}))))
@@ -163,7 +185,7 @@ func (s *BackgroundSuite) TestBackgroundSetUser(ctx context.Context, g *WithT) {
 			PointTo(MatchFields(IgnoreExtras, Fields{
 				"Timestamp": Equal(clkm.MustGet(ctx).Now()),
 				"Data": And(
-					HaveKeyWithValue("warning", "warning"),
+					HaveKeyWithValue("warning", "generic"),
 					HaveKeyWithValue("warning.message", "called SetUser in background Log"),
 				),
 			}))))
@@ -177,7 +199,7 @@ func (s *BackgroundSuite) TestBackgroundSetPropagatingField(ctx context.Context,
 			PointTo(MatchFields(IgnoreExtras, Fields{
 				"Timestamp": Equal(clkm.MustGet(ctx).Now()),
 				"Data": And(
-					HaveKeyWithValue("warning", "warning"),
+					HaveKeyWithValue("warning", "generic"),
 					HaveKeyWithValue("warning.message", "called SetPropagatingField in background Log"),
 				),
 			}))))
@@ -191,7 +213,7 @@ func (s *BackgroundSuite) TestBackgroundSetMetadataKey(ctx context.Context, g *W
 			PointTo(MatchFields(IgnoreExtras, Fields{
 				"Timestamp": Equal(clkm.MustGet(ctx).Now()),
 				"Data": And(
-					HaveKeyWithValue("warning", "warning"),
+					HaveKeyWithValue("warning", "generic"),
 					HaveKeyWithValue("warning.message", "called SetMetadataKey in background Log"),
 				),
 			}))))
@@ -205,7 +227,7 @@ func (s *BackgroundSuite) TestBackgroundSetErrorMetadataKey(ctx context.Context,
 			PointTo(MatchFields(IgnoreExtras, Fields{
 				"Timestamp": Equal(clkm.MustGet(ctx).Now()),
 				"Data": And(
-					HaveKeyWithValue("warning", "warning"),
+					HaveKeyWithValue("warning", "generic"),
 					HaveKeyWithValue("warning.message", "called SetErrorMetadataKey in background Log"),
 				),
 			}))))
@@ -219,7 +241,7 @@ func (s *BackgroundSuite) TestBackgroundSetErrorFlag(ctx context.Context, g *Wit
 			PointTo(MatchFields(IgnoreExtras, Fields{
 				"Timestamp": Equal(clkm.MustGet(ctx).Now()),
 				"Data": And(
-					HaveKeyWithValue("warning", "warning"),
+					HaveKeyWithValue("warning", "generic"),
 					HaveKeyWithValue("warning.message", "called SetErrorFlag in background Log"),
 				),
 			}))))
@@ -228,4 +250,3 @@ func (s *BackgroundSuite) TestBackgroundSetErrorFlag(ctx context.Context, g *Wit
 func (s *BackgroundSuite) TestBackgroundGetCurrentTraceLink(ctx context.Context, g *WithT) {
 	g.Expect(logm.MustGet(ctx).GetCurrentTraceLink()).To(BeNil())
 }
-*/
