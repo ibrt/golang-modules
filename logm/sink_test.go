@@ -182,6 +182,7 @@ func (s *SinkSuite) TestSink_Responses(g *WithT) {
 
 func (s *SinkSuite) TestSink_Sender(g *WithT) {
 	sink := logm.NewSink(nil, tlogm.NewMockSender())
+	g.Expect(sink.Start()).To(Succeed())
 	g.Expect(sink.SendResponse(transmission.Response{})).To(BeTrue())
 	g.Expect(sink.Flush()).To(Succeed())
 
