@@ -22,6 +22,12 @@ const (
 	StandardKeySecondaryParams = "secondaryParams"
 )
 
+type errorMetadataKey int
+
+const (
+	errorMetadataKeyIsEmitted errorMetadataKey = iota
+)
+
 var (
 	traceLinkRegexp = regexp.MustCompile(`^([\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12})-([\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12})$`)
 )
@@ -179,7 +185,7 @@ func addInfoFields(af addField, format string, o *emitOptions) {
 
 func addWarningFields(af addField, err error) {
 	addLocationFields(af, err)
-	af.AddField("warning", errorz.GetName(err, "generic-warning"))
+	af.AddField("warning", getWarningName(err))
 	af.AddField("warning.message", err.Error())
 	af.AddField("warning.dump", errorz.SDump(err))
 	maybeAddNumericField(af, "warning.status", errorz.GetHTTPStatus(err, 0))
@@ -187,7 +193,7 @@ func addWarningFields(af addField, err error) {
 
 func addErrorFields(af addField, err error) {
 	addLocationFields(af, err)
-	af.AddField("error", errorz.GetName(err, "generic-error"))
+	af.AddField("error", getErrorName(err))
 	af.AddField("error.message", err.Error())
 	af.AddField("error.dump", errorz.SDump(err))
 	maybeAddNumericField(af, "error.status", errorz.GetHTTPStatus(err, 0))
@@ -221,4 +227,21 @@ func newTraceableEvent(ctx context.Context, ne newEvent, name, spanID, parentSpa
 	e.AddField("trace.span_id", spanID)
 	maybeAddLenField(e, "", "trace.parent_id", parentSpanID)
 	return e
+}
+
+func getWarningName(err error) string {
+	return errorz.GetName(err, "generic")
+}
+
+func getErrorName(err error) string {
+	return errorz.GetName(err, "generic")
+}
+
+func maybeSetIsEmitted(err error) {
+	errorz.MaybeSetMetadata(err, errorMetadataKeyIsEmitted, true)
+}
+
+func getIsEmitted(err error) bool {
+	isEmitted, ok := errorz.MaybeGetMetadata[bool](err, errorMetadataKeyIsEmitted)
+	return ok && isEmitted
 }

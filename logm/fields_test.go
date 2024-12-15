@@ -295,7 +295,7 @@ func (*FieldsSuite) TestAddWarningFields(g *WithT) {
 
 		g.Expect(af.fields).To(And(
 			HaveKeyWithValue("location", Not(BeEmpty())),
-			HaveKeyWithValue("warning", Equal("generic-warning")),
+			HaveKeyWithValue("warning", Equal("generic")),
 			HaveKeyWithValue("warning.message", Equal("test error")),
 			HaveKeyWithValue("warning.dump", HavePrefix("(errorz.dump)")),
 			Not(HaveKey("warning.status")),
@@ -322,7 +322,7 @@ func (*FieldsSuite) TestAddErrorFields(g *WithT) {
 
 		g.Expect(af.fields).To(And(
 			HaveKeyWithValue("location", Not(BeEmpty())),
-			HaveKeyWithValue("error", Equal("generic-error")),
+			HaveKeyWithValue("error", Equal("generic")),
 			HaveKeyWithValue("error.message", Equal("test error")),
 			HaveKeyWithValue("error.dump", HavePrefix("(errorz.dump)")),
 			Not(HaveKey("error.status")),
@@ -389,4 +389,31 @@ func (*FieldsSuite) TestNewTraceableEvent(ctx context.Context, g *WithT) {
 		HaveKeyWithValue("trace.span_id", Equal("span-id")),
 		HaveKeyWithValue("trace.parent_id", Equal("parent-span-id")),
 	))
+}
+
+func (*FieldsSuite) TestGetWarningName(g *WithT) {
+	g.Expect(getWarningName(nil)).To(Equal("<nil>"))
+	g.Expect(getWarningName(fmt.Errorf("test error"))).To(Equal("generic"))
+	g.Expect(getWarningName(newTestCompleteError("", "name", 0))).To(Equal("name"))
+}
+
+func (*FieldsSuite) TestGetErrorName(g *WithT) {
+	g.Expect(getErrorName(nil)).To(Equal("<nil>"))
+	g.Expect(getErrorName(fmt.Errorf("test error"))).To(Equal("generic"))
+	g.Expect(getErrorName(newTestCompleteError("", "name", 0))).To(Equal("name"))
+}
+
+func (*FieldsSuite) TestIsEmitted(g *WithT) {
+	{
+		err := fmt.Errorf("test error")
+		g.Expect(getIsEmitted(err)).To(BeFalse())
+		maybeSetIsEmitted(err)
+		g.Expect(getIsEmitted(err)).To(BeFalse())
+	}
+	{
+		err := errorz.Errorf("test error")
+		g.Expect(getIsEmitted(err)).To(BeFalse())
+		maybeSetIsEmitted(err)
+		g.Expect(getIsEmitted(err)).To(BeTrue())
+	}
 }
