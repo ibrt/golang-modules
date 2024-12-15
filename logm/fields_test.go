@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/honeycombio/libhoney-go"
 	"github.com/ibrt/golang-utils/errorz"
@@ -13,6 +14,7 @@ import (
 	"github.com/ibrt/golang-utils/memz"
 	. "github.com/onsi/gomega"
 
+	"github.com/ibrt/golang-modules/clkm"
 	"github.com/ibrt/golang-modules/clkm/tclkm"
 )
 
@@ -342,24 +344,49 @@ func (*FieldsSuite) TestAddErrorFields(g *WithT) {
 
 func (*FieldsSuite) TestNewAttachableEvent(ctx context.Context, g *WithT) {
 	ne := newTestNewEvent()
+	e := newAttachableEvent(ctx, ne, "attached-span-id", "name")
 
-	g.Expect(newAttachableEvent(ctx, ne, "attached-span-id", "name").Fields()).
-		To(Equal(map[string]any{
-			"meta.annotation_type": "span_event",
-			"trace.parent_id":      "attached-span-id",
-			"name":                 "name",
-		}))
+	g.Expect(e.Timestamp).To(Equal(clkm.MustGet(ctx).Now()))
+	g.Expect(e.Fields()).To(Equal(map[string]any{
+		"meta.annotation_type": "span_event",
+		"trace.parent_id":      "attached-span-id",
+		"name":                 "name",
+	}))
 }
 
 func (*FieldsSuite) TestNewTraceLinkEvent(ctx context.Context, g *WithT) {
 	ne := newTestNewEvent()
 
-	g.Expect(newTraceLinkEvent(
+	e := newTraceLinkEvent(
 		ctx, ne, "attached-span-id",
 		&TraceLink{
 			TraceID: "trace-id",
 			SpanID:  "span-id",
-		}).
-		Fields()).
-		To(Equal(map[string]any{}))
+		})
+
+	g.Expect(e.Timestamp).To(Equal(clkm.MustGet(ctx).Now()))
+
+	g.Expect(e.Fields()).To(Equal(map[string]any{
+		"meta.annotation_type": "link",
+		"trace.parent_id":      "attached-span-id",
+		"trace.link.trace_id":  "trace-id",
+		"trace.link.span_id":   "span-id",
+		"name":                 "link-annotation",
+	}))
+}
+
+func (*FieldsSuite) TestNewTraceableEvent(ctx context.Context, g *WithT) {
+	ne := newTestNewEvent()
+	startTime := clkm.MustGet(ctx).Now().Add(-time.Second)
+	e := newTraceableEvent(ctx, ne, "name", "span-id", "parent-span-id", startTime)
+
+	g.Expect(e.Timestamp).To(Equal(startTime))
+
+	g.Expect(e.Fields()).To(And(
+		HaveKeyWithValue("location", Not(BeEmpty())),
+		HaveKeyWithValue("duration_ms", BeNumerically("==", 1000)),
+		HaveKeyWithValue("name", Equal("name")),
+		HaveKeyWithValue("trace.span_id", Equal("span-id")),
+		HaveKeyWithValue("trace.parent_id", Equal("parent-span-id")),
+	))
 }
