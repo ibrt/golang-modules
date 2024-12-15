@@ -31,8 +31,8 @@ github.com/google/pprof v0.0.0-20240827171923-fa2c70bbbfe5 h1:5iH8iuqE5apketRbSF
 github.com/google/pprof v0.0.0-20240827171923-fa2c70bbbfe5/go.mod h1:vavhavw2zAxS5dIdcRluK6cSGGPlZynqzFM8NdvU144=
 github.com/honeycombio/libhoney-go v1.24.0 h1:PPgVrd8FOiQeL24FOEuhF9SFA3oDgaA/AU/Agu2ZKkA=
 github.com/honeycombio/libhoney-go v1.24.0/go.mod h1:oW9gF/appfQoDjtXfcfH5hp5v3F0xpTy42+NBRCYk9k=
-github.com/ibrt/golang-utils v0.9.0 h1:QQSiRHgsdzIO7faxNqWhdylwSIZE1N+VGJYINIP3VZg=
-github.com/ibrt/golang-utils v0.9.0/go.mod h1:KQF3oD7IWvTri0Plm/tAVwppoh16f4r8zGO+FCMzyiA=
+github.com/ibrt/golang-utils v0.10.0 h1:ntyERVySjMYEv4HLxWRpdUHVNqm1n6DU4722rsiCyEs=
+github.com/ibrt/golang-utils v0.10.0/go.mod h1:KQF3oD7IWvTri0Plm/tAVwppoh16f4r8zGO+FCMzyiA=
 github.com/klauspost/compress v1.17.9 h1:6KIumPrER1LHsvBVuDa0r5xaG0Es51mhhB9BQB2qeMA=
 github.com/klauspost/compress v1.17.9/go.mod h1:Di0epgTjJY877eYKx5yC51cX2A2Vl2ibi7bDH9ttBbw=
 github.com/mattn/go-colorable v0.1.13 h1:fFA4WZxdEF4tXPZVKMLwD8oUnCTTo08duU7wxecdEvA=

@@ -6,7 +6,7 @@ require (
 	github.com/benbjohnson/clock v1.3.5
 	github.com/caarlos0/env/v11 v11.2.2
 	github.com/honeycombio/libhoney-go v1.24.0
-	github.com/ibrt/golang-utils v0.9.0
+	github.com/ibrt/golang-utils v0.10.0
 	github.com/onsi/gomega v1.36.1
 	github.com/sirupsen/logrus v1.9.3
 	go.uber.org/mock v0.5.0
