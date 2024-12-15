@@ -90,7 +90,7 @@ func NewSingletonInjector(log RawLog) injectz.Injector {
 // MustGet extracts, panics if not found.
 func MustGet(ctx context.Context) Log {
 	return &adapterLogImpl{
-		ctx: ctx,
-		log: ctx.Value(logContextKey).(RawLog),
+		ctx:    ctx,
+		rawLog: ctx.Value(logContextKey).(RawLog),
 	}
 }
