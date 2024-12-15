@@ -1,3 +1,4 @@
+// Package cfgm implements a configuration module.
 package cfgm
 
 import (

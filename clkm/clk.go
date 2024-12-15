@@ -1,3 +1,4 @@
+// Package clkm implements a clock module.
 package clkm
 
 import (
