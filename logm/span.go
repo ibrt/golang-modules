@@ -59,7 +59,7 @@ func (sL *spanLogImpl) EmitWarning(ctx context.Context, err error) {
 	defer sL.m.Unlock()
 
 	maybeSetIsEmitted(err)
-	e := newAttachableEvent(ctx, sL.b, sL.spanID, getWarningName(err))
+	e := newAttachableEvent(ctx, sL.b, sL.spanID, "warning")
 	addWarningFields(e, err)
 	errorz.MaybeMustWrap(e.Send())
 }
@@ -71,7 +71,7 @@ func (sL *spanLogImpl) EmitError(ctx context.Context, err error) {
 
 	maybeSetIsEmitted(err)
 	sL.hasErrorFlag = true
-	e := newAttachableEvent(ctx, sL.b, sL.spanID, getErrorName(err))
+	e := newAttachableEvent(ctx, sL.b, sL.spanID, "error")
 	addErrorFields(e, err)
 	errorz.MaybeMustWrap(e.Send())
 }
