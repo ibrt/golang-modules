@@ -180,9 +180,15 @@ func (s *SinkSuite) TestSink_Responses(g *WithT) {
 	g.Eventually(closed.Load, "1s", "10ms").Should(BeTrue())
 }
 
-func (s *SinkSuite) TestSink_Sender(g *WithT) {
-	sink := logm.NewSink(nil, tlogm.NewMockSender())
+func (s *SinkSuite) TestSink_Sender(ctx context.Context, g *WithT) {
+	sender := tlogm.NewMockSender()
+	sink := logm.NewSink(nil, sender)
+
 	g.Expect(sink.Start()).To(Succeed())
+
+	sink.Add(&transmission.Event{Timestamp: clkm.MustGet(ctx).Now()})
+	g.Expect(sender.GetEvents()).To(HaveExactElements(&transmission.Event{Timestamp: clkm.MustGet(ctx).Now()}))
+
 	g.Expect(sink.SendResponse(transmission.Response{})).To(BeTrue())
 	g.Expect(sink.Flush()).To(Succeed())
 
@@ -249,6 +255,14 @@ func (s *SinkSuite) TestMustNewDefaultLogrusLogger(ctx context.Context, g *WithT
 		_, ok := logger.Formatter.(*logrus.JSONFormatter)
 		g.Expect(ok).To(BeTrue())
 	}
+
+	g.Expect(func() {
+		logm.MustNewDefaultLogrusLogger(
+			cfgm.NewSingletonInjector[logm.LogConfigMixin](&logm.LogConfig{
+				LogrusOutput: "invalid",
+				LogrusLevel:  logrus.TraceLevel,
+			})(ctx))
+	}).To(PanicWith(MatchError("invalid value for LogConfigLogrusOutput: 'invalid'")))
 }
 
 func (s *SinkSuite) TestMustNewDefaultHoneycombSender(ctx context.Context, g *WithT) {
