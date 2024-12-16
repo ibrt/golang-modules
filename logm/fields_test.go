@@ -19,7 +19,7 @@ import (
 )
 
 var (
-	_ addField               = (*testAddField)(nil)
+	_ AddField               = (*testAddField)(nil)
 	_ newEvent               = (*testNewEvent)(nil)
 	_ error                  = (*testCompleteError)(nil)
 	_ errorz.ErrorName       = (*testCompleteError)(nil)

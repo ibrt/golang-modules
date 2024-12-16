@@ -77,7 +77,8 @@ type fieldValueNumeric interface {
 	int | float64
 }
 
-type addField interface {
+// AddField describes the ability to add fields to an event.
+type AddField interface {
 	AddField(string, any)
 }
 
@@ -85,7 +86,7 @@ type newEvent interface {
 	NewEvent() *libhoney.Event
 }
 
-func maybeAddLenField[T fieldValueLen](af addField, prefix, key string, value T) {
+func maybeAddLenField[T fieldValueLen](af AddField, prefix, key string, value T) {
 	if len(value) == 0 {
 		return
 	}
@@ -99,13 +100,13 @@ func maybeAddLenField[T fieldValueLen](af addField, prefix, key string, value T)
 	af.AddField(prefix+key, value)
 }
 
-func maybeAddNumericField[T fieldValueNumeric](af addField, key string, value T) {
+func maybeAddNumericField[T fieldValueNumeric](af AddField, key string, value T) {
 	if value != 0 {
 		af.AddField(key, value)
 	}
 }
 
-func addLocationFields(af addField, framesSource error) {
+func addLocationFields(af AddField, framesSource error) {
 	frames := memz.FilterSlice(errorz.GetFrames(framesSource), func(f *errorz.Frame) bool {
 		return f.ShortPackage != "logm"
 	})
@@ -117,21 +118,21 @@ func addLocationFields(af addField, framesSource error) {
 	}
 }
 
-func maybeAddSpanEventAnnotationFields(af addField, spanID string) {
+func maybeAddSpanEventAnnotationFields(af AddField, spanID string) {
 	if spanID != "" {
 		af.AddField("meta.annotation_type", "span_event")
 		af.AddField("trace.parent_id", spanID)
 	}
 }
 
-func maybeAddUserFields(af addField, user *User) {
+func maybeAddUserFields(af AddField, user *User) {
 	if user != nil {
 		maybeAddLenField(af, "", "scope.user", user.ID)
 		maybeAddLenField(af, "", "scope.user.email", user.Email)
 	}
 }
 
-func addMetadataFields(af addField, prefix string, metadata map[string]any) {
+func addMetadataFields(af AddField, prefix string, metadata map[string]any) {
 	if prefix != "" {
 		if !strings.HasSuffix(prefix, ".") {
 			prefix += "."
@@ -169,21 +170,21 @@ func maybeFlattenMetadataValue(v any) (map[string]any, bool) {
 	return m, true
 }
 
-func addDebugFields(af addField, format string, o *emitOptions) {
+func addDebugFields(af AddField, format string, o *emitOptions) {
 	addLocationFields(af, nil)
 	af.AddField("debug", true)
 	maybeAddLenField(af, "", "debug.message", fmt.Sprintf(format, o.args...))
 	addMetadataFields(af, "debug.metadata", o.metadata)
 }
 
-func addInfoFields(af addField, format string, o *emitOptions) {
+func addInfoFields(af AddField, format string, o *emitOptions) {
 	addLocationFields(af, nil)
 	af.AddField("info", true)
 	maybeAddLenField(af, "", "info.message", fmt.Sprintf(format, o.args...))
 	addMetadataFields(af, "info.metadata", o.metadata)
 }
 
-func addWarningFields(af addField, err error) {
+func addWarningFields(af AddField, err error) {
 	addLocationFields(af, err)
 	af.AddField("warning", getWarningName(err))
 	af.AddField("warning.message", err.Error())
@@ -191,7 +192,7 @@ func addWarningFields(af addField, err error) {
 	maybeAddNumericField(af, "warning.status", errorz.GetHTTPStatus(err, 0))
 }
 
-func addErrorFields(af addField, err error) {
+func addErrorFields(af AddField, err error) {
 	addLocationFields(af, err)
 	af.AddField("error", getErrorName(err))
 	af.AddField("error.message", err.Error())
