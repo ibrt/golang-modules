@@ -53,7 +53,7 @@ type RawLog interface {
 }
 
 // NewInitializer returns a new [injectz.Initializer] that configures the given client-level fields.
-func NewInitializer(clientFields map[string]any) injectz.Initializer {
+func NewInitializer(addClientFields func(context.Context, AddField)) injectz.Initializer {
 	return func(ctx context.Context) (injectz.Injector, injectz.Releaser) {
 		clkm.MustGet(ctx)
 		logCfg := cfgm.MustGet[LogConfigMixin](ctx).GetLogConfig()
@@ -68,8 +68,8 @@ func NewInitializer(clientFields map[string]any) injectz.Initializer {
 		})
 		errorz.MaybeMustWrap(err)
 
-		for k, v := range clientFields {
-			client.AddField(k, v)
+		if addClientFields != nil {
+			addClientFields(ctx, client)
 		}
 
 		return NewSingletonInjector(NewRawLogFromClient(client)), func() { client.Close() }
