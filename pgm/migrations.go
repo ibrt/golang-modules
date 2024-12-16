@@ -9,13 +9,14 @@ import (
 	"github.com/jackc/tern/v2/migrate"
 )
 
-const (
-	// MigrationsTableName is the name of the migrations table.
-	MigrationsTableName = "migrations"
-)
+// MigrationsConfig describes the configuration for migrations.
+type MigrationsConfig struct {
+	TableName string
+	FS        embed.FS
+}
 
-func maybeMustApplyMigrationsInternal(ctx context.Context, pool *pgxpool.Pool, migrationsFS *embed.FS) {
-	if migrationsFS == nil {
+func maybeMustApplyMigrationsInternal(ctx context.Context, pool *pgxpool.Pool, cfg *MigrationsConfig) {
+	if cfg == nil {
 		return
 	}
 
@@ -23,8 +24,8 @@ func maybeMustApplyMigrationsInternal(ctx context.Context, pool *pgxpool.Pool, m
 	errorz.MaybeMustWrap(err)
 	defer conn.Release()
 
-	m, err := migrate.NewMigrator(ctx, conn.Conn(), MigrationsTableName)
+	m, err := migrate.NewMigrator(ctx, conn.Conn(), cfg.TableName)
 	errorz.MaybeMustWrap(err)
-	errorz.MaybeMustWrap(m.LoadMigrations(migrationsFS))
+	errorz.MaybeMustWrap(m.LoadMigrations(cfg.FS))
 	errorz.MaybeMustWrap(m.Migrate(ctx))
 }

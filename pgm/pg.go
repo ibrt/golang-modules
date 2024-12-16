@@ -3,7 +3,6 @@ package pgm
 
 import (
 	"context"
-	"embed"
 
 	"github.com/ibrt/golang-utils/errorz"
 	"github.com/ibrt/golang-utils/injectz"
@@ -39,7 +38,7 @@ type RawPG interface {
 }
 
 // NewInitializer returns a new [injectz.Initializer] that applies the given migrations (if any).
-func NewInitializer(migrationsFS *embed.FS) injectz.Initializer {
+func NewInitializer(migCfg *MigrationsConfig) injectz.Initializer {
 	return func(outCtx context.Context) (injectz.Injector, injectz.Releaser) {
 		return logm.Wrap2Panic(outCtx, "pgm.Initializer", func(ctx context.Context) (injectz.Injector, injectz.Releaser, error) {
 			clkm.MustGet(ctx)
@@ -52,7 +51,7 @@ func NewInitializer(migrationsFS *embed.FS) injectz.Initializer {
 			pool, err := pgxpool.NewWithConfig(ctx, poolCfg)
 			errorz.MaybeMustWrap(err)
 
-			maybeMustApplyMigrationsInternal(ctx, pool, migrationsFS)
+			maybeMustApplyMigrationsInternal(ctx, pool, migCfg)
 			return NewSingletonInjector(NewPGFromPool(pool)), getReleaser(outCtx, pool), nil
 		})
 	}

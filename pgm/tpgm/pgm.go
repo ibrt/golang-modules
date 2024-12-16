@@ -2,7 +2,6 @@ package tpgm
 
 import (
 	"context"
-	"embed"
 	"fmt"
 	"net/url"
 	"strings"
@@ -28,10 +27,10 @@ var (
 
 // Helper is a test helper.
 type Helper struct {
-	MigrationsFS    *embed.FS
-	dbName          string
-	origPostgresURL string
-	releaser        func()
+	MigrationsConfig *pgm.MigrationsConfig
+	dbName           string
+	origPostgresURL  string
+	releaser         func()
 }
 
 // BeforeSuite implements [fixturez.BeforeSuite].
@@ -42,7 +41,7 @@ func (h *Helper) BeforeSuite(ctx context.Context, _ *gomega.WithT) context.Conte
 	h.mustCreateDB(ctx, cfg.PostgresURL, h.dbName)
 	h.origPostgresURL, cfg.PostgresURL = cfg.PostgresURL, h.mustSelectDB(cfg.PostgresURL, h.dbName)
 
-	injector, releaser := pgm.NewInitializer(h.MigrationsFS)(ctx)
+	injector, releaser := pgm.NewInitializer(h.MigrationsConfig)(ctx)
 	h.releaser = releaser
 	return injector(ctx)
 }
@@ -68,7 +67,7 @@ func (h *Helper) BeforeTest(ctx context.Context, _ *gomega.WithT, _ *gomock.Cont
 
 	rows, err := pgm.MustGet(ctx).Query("test.list_tables",
 		`SELECT tablename FROM pg_tables WHERE schemaname = 'public' AND tablename <> $1`,
-		pgm.MigrationsTableName)
+		h.MigrationsConfig.TableName)
 	errorz.MaybeMustWrap(err)
 
 	tables, err := pgx.CollectRows(rows, pgx.RowToAddrOfStructByName[table])
