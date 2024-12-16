@@ -36,7 +36,7 @@ func (v *TestConfigMixinImpl) GetMixin() *TestConfigMixinImpl {
 }
 
 type TestConfig struct {
-	Key string `env:"KEY_EC2B754B,notEmpty"`
+	Key string `env:"KEY_EC2B754B,notEmpty" validate:"required,oneof=Value OtherValue"`
 	TestConfigMixinImpl
 }
 
@@ -87,7 +87,23 @@ func (*Suite) TestEnvConfigLoader(ctx context.Context, g *WithT) {
 			"TEST_MIXIN_KEY_EC2B754B": "MixinValue",
 		},
 		func() {
-			cfg, err := cfgm.MustNewEnvConfigLoader[*TestConfig](&cfgm.EnvConfigLoaderOptions{Prefix: "TEST_"})(ctx)
+			cfg, err := cfgm.MustNewEnvConfigLoader[*TestConfig](&cfgm.EnvConfigLoaderOptions{Prefix: "TEST_"}, false)(ctx)
+			g.Expect(err).ToNot(HaveOccurred())
+			g.Expect(cfg).To(Equal(&TestConfig{
+				Key: "Value",
+				TestConfigMixinImpl: TestConfigMixinImpl{
+					MixinKey: "MixinValue",
+				},
+			}))
+		})
+
+	envz.WithEnv(
+		map[string]string{
+			"TEST_KEY_EC2B754B":       "Value",
+			"TEST_MIXIN_KEY_EC2B754B": "MixinValue",
+		},
+		func() {
+			cfg, err := cfgm.MustNewEnvConfigLoader[*TestConfig](&cfgm.EnvConfigLoaderOptions{Prefix: "TEST_"}, true)(ctx)
 			g.Expect(err).ToNot(HaveOccurred())
 			g.Expect(cfg).To(Equal(&TestConfig{
 				Key: "Value",
@@ -103,7 +119,7 @@ func (*Suite) TestEnvConfigLoader(ctx context.Context, g *WithT) {
 			"MIXIN_KEY_EC2B754B": "MixinValue",
 		},
 		func() {
-			cfg, err := cfgm.MustNewEnvConfigLoader[*TestConfig](nil)(ctx)
+			cfg, err := cfgm.MustNewEnvConfigLoader[*TestConfig](nil, false)(ctx)
 			g.Expect(err).ToNot(HaveOccurred())
 			g.Expect(cfg).To(Equal(&TestConfig{
 				Key: "Value",
@@ -119,7 +135,17 @@ func (*Suite) TestEnvConfigLoader(ctx context.Context, g *WithT) {
 			"MIXIN_KEY_EC2B754B": "",
 		},
 		func() {
-			_, err := cfgm.MustNewEnvConfigLoader[*TestConfig](nil)(ctx)
+			_, err := cfgm.MustNewEnvConfigLoader[*TestConfig](nil, false)(ctx)
 			g.Expect(err).To(MatchError("env: environment variable \"KEY_EC2B754B\" should not be empty; environment variable \"MIXIN_KEY_EC2B754B\" should not be empty"))
+		})
+
+	envz.WithEnv(
+		map[string]string{
+			"KEY_EC2B754B":       "InvalidValue",
+			"MIXIN_KEY_EC2B754B": "MixinValue",
+		},
+		func() {
+			_, err := cfgm.MustNewEnvConfigLoader[*TestConfig](nil, true)(ctx)
+			g.Expect(err).To(MatchError("validation error(s):\n- Key: 'TestConfig.Key' Error:Field validation for 'Key' failed on the 'oneof' tag"))
 		})
 }

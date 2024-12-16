@@ -46,7 +46,7 @@ type LogConfigMixin interface {
 type LogConfig struct {
 	HoneycombAPIKey     string                `env:"LOG_HONEYCOMB_API_KEY,required"`
 	HoneycombDataset    string                `env:"LOG_HONEYCOMB_DATASET,required"`
-	HoneycombSampleRate uint                  `env:"LOG_HONEYCOMB_SAMPLE_RATE,required"`
+	HoneycombSampleRate uint                  `env:"LOG_HONEYCOMB_SAMPLE_RATE,required" validate:"required,min=1"`
 	LogrusOutput        LogConfigLogrusOutput `env:"LOG_LOGRUS_OUTPUT,required"`
 	LogrusLevel         logrus.Level          `env:"LOG_LOGRUS_LEVEL,required"`
 }

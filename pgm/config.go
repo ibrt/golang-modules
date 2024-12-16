@@ -12,7 +12,7 @@ type PGConfigMixin interface {
 
 // PGConfig describes the module configuration.
 type PGConfig struct {
-	PostgresURL string `env:"POSTGRES_URL,required"`
+	PostgresURL string `env:"POSTGRES_URL,required" validate:"required,url"`
 }
 
 // Config implements the [cfgm.Config] interface.

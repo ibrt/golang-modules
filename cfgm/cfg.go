@@ -8,6 +8,7 @@ import (
 	"github.com/caarlos0/env/v11"
 	"github.com/ibrt/golang-utils/errorz"
 	"github.com/ibrt/golang-utils/injectz"
+	"github.com/ibrt/golang-utils/vldz"
 )
 
 type contextKey int
@@ -35,7 +36,7 @@ type EnvConfigLoaderOptions = env.Options
 
 // MustNewEnvConfigLoader returns a [ConfigLoader] that loads the config from environment variables.
 // Under the hood it uses "github.com/caarlos0/env/v11". T must be a struct pointer.
-func MustNewEnvConfigLoader[T Config](options *EnvConfigLoaderOptions) ConfigLoader[T] {
+func MustNewEnvConfigLoader[T Config](options *EnvConfigLoaderOptions, enableValidation bool) ConfigLoader[T] {
 	{
 		var cfg T
 		t := reflect.TypeOf(cfg)
@@ -49,7 +50,18 @@ func MustNewEnvConfigLoader[T Config](options *EnvConfigLoaderOptions) ConfigLoa
 	return func(ctx context.Context) (T, error) {
 		var cfg T
 		reflect.ValueOf(&cfg).Elem().Set(reflect.New(reflect.TypeOf(cfg).Elem()))
-		return cfg, errorz.MaybeWrap(env.ParseWithOptions(cfg, *options))
+
+		if err := env.ParseWithOptions(cfg, *options); err != nil {
+			return cfg, errorz.Wrap(err)
+		}
+
+		if enableValidation {
+			if err := vldz.ValidateStruct(cfg); err != nil {
+				return cfg, errorz.Wrap(err)
+			}
+		}
+
+		return cfg, nil
 	}
 }
 
