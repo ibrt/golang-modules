@@ -2,6 +2,7 @@ package logm
 
 import (
 	"encoding"
+	"fmt"
 
 	"github.com/ibrt/golang-utils/errorz"
 	"github.com/sirupsen/logrus"
@@ -36,6 +37,11 @@ func (l *LogConfigLogrusOutput) UnmarshalText(text []byte) error {
 	}
 }
 
+// String implements the [fmt.Stringer] interface.
+func (l *LogConfigLogrusOutput) String() string {
+	return string(*l)
+}
+
 // LogConfigMixin describes the module configuration.
 type LogConfigMixin interface {
 	cfgm.Config
@@ -49,6 +55,17 @@ type LogConfig struct {
 	HoneycombSampleRate uint                  `env:"LOG_HONEYCOMB_SAMPLE_RATE,required" validate:"required,min=1"`
 	LogrusOutput        LogConfigLogrusOutput `env:"LOG_LOGRUS_OUTPUT,required"`
 	LogrusLevel         logrus.Level          `env:"LOG_LOGRUS_LEVEL,required"`
+}
+
+// ToEnv converts the config to an env map.
+func (c *LogConfig) ToEnv(prefix string) map[string]string {
+	return map[string]string{
+		prefix + "LOG_HONEYCOMB_API_KEY":     c.HoneycombAPIKey,
+		prefix + "LOG_HONEYCOMB_DATASET":     c.HoneycombDataset,
+		prefix + "LOG_HONEYCOMB_SAMPLE_RATE": fmt.Sprintf("%v", c.HoneycombSampleRate),
+		prefix + "LOG_LOGRUS_OUTPUT":         c.LogrusOutput.String(),
+		prefix + "LOG_LOGRUS_LEVEL":          c.LogrusLevel.String(),
+	}
 }
 
 // Config implements the [cfgm.Config] interface.

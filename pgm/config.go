@@ -12,7 +12,14 @@ type PGConfigMixin interface {
 
 // PGConfig describes the module configuration.
 type PGConfig struct {
-	PostgresURL string `env:"POSTGRES_URL,required" validate:"required,url"`
+	PostgresURL string `env:"PG_POSTGRES_URL,required" validate:"required,url"`
+}
+
+// ToEnv converts the config to an env map.
+func (c *PGConfig) ToEnv(prefix string) map[string]string {
+	return map[string]string{
+		prefix + "PG_POSTGRES_URL": c.PostgresURL,
+	}
 }
 
 // Config implements the [cfgm.Config] interface.
