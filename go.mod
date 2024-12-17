@@ -6,7 +6,7 @@ require (
 	github.com/benbjohnson/clock v1.3.5
 	github.com/caarlos0/env/v11 v11.3.0
 	github.com/honeycombio/libhoney-go v1.24.0
-	github.com/ibrt/golang-utils v0.11.0
+	github.com/ibrt/golang-utils v0.12.0
 	github.com/jackc/pgerrcode v0.0.0-20240316143900-6e2875d9b438
 	github.com/jackc/pgx/v5 v5.7.1
 	github.com/jackc/tern/v2 v2.3.0
